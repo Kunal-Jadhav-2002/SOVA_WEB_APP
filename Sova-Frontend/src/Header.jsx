@@ -35,7 +35,7 @@ const Header = () => {
   return (
     <header className="header">
       <div className="logo">
-        <img className="l1" src="public/images/Sova-logo.jpg" loading="lazy" alt="Sova Logo" />
+        <img className="l1" src="images/Sova-logo.jpg" loading="lazy" alt="Sova Logo" />
         <div className="heading">
           <h1 className="h1">SOVA</h1>
           <h1 className="h2">Gloves</h1>
