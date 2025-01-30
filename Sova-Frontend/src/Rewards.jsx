@@ -206,7 +206,7 @@ const Rewards = () => {
   // Fetch reward data from the backend
   useEffect(() => {
     axios
-      .get("http://localhost:8000/api/reward-content")
+      .get(`${import.meta.env.VITE_BACKEND}/api/reward-content`)
       .then((response) => {
         setRewards(response.data);
       })
