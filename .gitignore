@@ -2,3 +2,4 @@ server/node_modules
 server/.env
 
 Sova-Frontend/node_modules
+Sova-Frontend/.env
