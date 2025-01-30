@@ -9,7 +9,7 @@ const DonorReviews = () => {
   // Function to fetch the donor data
   const loadDonorReviews = async () => {
     try {
-      const response = await axios.get('http://localhost:8000/api/donors');
+      const response = await axios.get(`${import.meta.env.VITE_BACKEND}/api/donors`);
       setDonors(response.data); // Set donors state with API response data
     } catch (error) {
       console.error('Error loading donor reviews:', error);

@@ -8,7 +8,7 @@ const ProductSection = () => {
   useEffect(() => {
     const fetchProductFeatures = async () => {
       try {
-        const response = await axios.get('http://localhost:8000/api/product-features'); // Replace with your actual API URL
+        const response = await axios.get(`${import.meta.env.VITE_BACKEND}/api/product-features`); // Replace with your actual API URL
         setFeatures(response.data); // Assumes the API returns an array of features
       } catch (err) {
         console.error('Error fetching product features:', err);

@@ -21,7 +21,7 @@ const Rewards = () => {
   useEffect(() => {
     const initializeSDK = async () => {
       try {
-        const cf = await load({ mode: "sandbox" }); // Ensure Cashfree SDK is loaded
+        const cf = await load({ mode: "production" }); // Ensure Cashfree SDK is loaded
         setCashfree(cf);
       } catch (error) {
         console.error("Failed to initialize Cashfree SDK:", error);
@@ -41,7 +41,7 @@ const Rewards = () => {
         totalContribution: totalContribution,
       };
   
-      const res = await axios.post("http://localhost:8000/payment", formData);
+      const res = await axios.post(`${import.meta.env.VITE_BACKEND}/payment`, formData);
   
       if (res.data && res.data.payment_session_id) {
         setOrderId(res.data.order_id);
@@ -61,7 +61,7 @@ const Rewards = () => {
   const verifyPayment = async () => {
     try {
       console.log("Verifying payment...");
-      const res = await axios.post("http://localhost:8000/verify", { orderId });
+      const res = await axios.post(`${import.meta.env.VITE_BACKEND}/verify`, { orderId });
 
       if (res.data && res.data.payment_status === "SUCCESS") {
         alert("Payment verified successfully!");
@@ -77,7 +77,7 @@ const Rewards = () => {
 
   const validateReward = async () => {
     try {
-      const res = await axios.post("http://localhost:8000/validate-reward", {
+      const res = await axios.post(`${import.meta.env.VITE_BACKEND}/validate-reward`, {
         title: donorTitle,
         amount: totalContribution,
       });
@@ -174,7 +174,7 @@ const Rewards = () => {
       };
   
       // Send form data to the backend to store in Firebase
-      await axios.post("http://localhost:8000/store-contribution", formData);
+      await axios.post(`${import.meta.env.VITE_BACKEND}/store-contribution1`, formData);
 
       if (cashfree) {
         cashfree

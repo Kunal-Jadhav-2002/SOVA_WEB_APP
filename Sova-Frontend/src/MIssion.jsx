@@ -1,13 +1,15 @@
 import { useEffect, useState } from 'react';
 import axios from 'axios';
 
+
 const MissionSection = () => {
   const [videos, setVideos] = useState([]);
 
   useEffect(() => {
     const fetchVideos = async () => {
       try {
-        const response = await axios.get('http://localhost:8000/api/getVideos');
+        const response = await axios.get(`${import.meta.env.VITE_BACKEND}/api/getVideos`);
+
         setVideos(response.data.videos); // Assuming the API returns { videos: [...] }
       } catch (err) {
         console.error('Error fetching videos:', err);

@@ -28,7 +28,7 @@ firebaseAdmin.initializeApp({
 // Initialize Cashfree credentials
 Cashfree.XClientId = process.env.CLIENT_ID;
 Cashfree.XClientSecret = process.env.CLIENT_SECRET;
-Cashfree.XEnvironment = Cashfree.Environment.SANDBOX;
+Cashfree.XEnvironment = Cashfree.Environment.PRODUCTION;
 
 // Generate a unique order ID
 function generateOrderId() {
@@ -511,7 +511,7 @@ const products = [
 
 // Route to serve the products page
 app.get('/api/products', (req, res) => {
-  res.json(products);
+  res.json(products); 
 });
 
 

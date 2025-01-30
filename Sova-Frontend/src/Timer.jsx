@@ -13,7 +13,7 @@ const Timer = () => {
     useEffect(() => {
         const fetchTargetDate = async () => {
             try {
-                const response = await axios.get('http://localhost:8000/api/target-date'); // Replace with your API endpoint
+                const response = await axios.get(`${import.meta.env.VITE_BACKEND}/api/target-date`); // Replace with your API endpoint
                 console.log('Fetched target date:', response.data.targetDate);
                 setTargetDate(new Date(response.data.targetDate));
             } catch (error) {

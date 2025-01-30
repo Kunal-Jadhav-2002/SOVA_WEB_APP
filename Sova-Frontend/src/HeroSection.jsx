@@ -8,7 +8,7 @@ const HeroSection = () => {
     useEffect(() => {
         const fetchHeroContent = async () => {
             try {
-                const response = await axios.get('http://localhost:8000/api/hero-content'); // Use the full URL for the server endpoint
+                const response = await axios.get(`${import.meta.env.VITE_BACKEND}/api/hero-content`); // Use the full URL for the server endpoint
                 setHeroContent(response.data);
             } catch (error) {
                 console.error("Error fetching hero content:", error);

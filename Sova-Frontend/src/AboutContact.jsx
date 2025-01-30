@@ -24,7 +24,7 @@ const AboutContact = () => {
 
     // Send the form data to the server using Axios
     axios
-      .post('http://localhost:8000/api/send-email', formData, {
+      .post(`${import.meta.env.VITE_BACKEND}/api/send-email`, formData, {
         headers: {
           'Content-Type': 'application/json',
         },

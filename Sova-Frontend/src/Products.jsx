@@ -8,7 +8,7 @@ const Products = () => {
   useEffect(() => {
     const loadProducts = async () => {
       try {
-        const response = await axios.get('http://localhost:8000/api/products'); // Fetch product data
+        const response = await axios.get(`${import.meta.env.VITE_BACKEND}/api/products`); // Fetch product data
         setProducts(response.data); // Assuming the API returns an array of products
       } catch (err) {
         console.error('Error loading products:', err);

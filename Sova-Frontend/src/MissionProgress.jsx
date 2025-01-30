@@ -11,7 +11,7 @@ const MissionProgress = () => {
     useEffect(() => {
         const fetchStats = async () => {
             try {
-                const response = await axios.get('http://localhost:8000/api/get-stats'); // Replace with your API endpoint
+                const response = await axios.get(`${import.meta.env.VITE_BACKEND}/api/get-stats`); // Replace with your API endpoint
                 setStats({
                     totalDonation: response.data.totalDonation,
                     totalFarmersReached: response.data.totalFarmersReached,

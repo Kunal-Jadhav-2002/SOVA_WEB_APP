@@ -22,7 +22,7 @@ function Payment() {
   // Get payment session ID
   const getSessionId = async () => {
     try {
-      const res = await axios.get("http://localhost:8000/payment", { params: { orderAmount: amount } });
+      const res = await axios.get(`${import.meta.env.VITE_BACKEND}/payment`, { params: { orderAmount: amount } });
       
       if (res.data && res.data.payment_session_id) {
         setOrderId(res.data.order_id);
