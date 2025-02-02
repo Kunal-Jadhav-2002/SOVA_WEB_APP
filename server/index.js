@@ -28,7 +28,66 @@ firebaseAdmin.initializeApp({
 // Initialize Cashfree credentials
 Cashfree.XClientId = process.env.CLIENT_ID;
 Cashfree.XClientSecret = process.env.CLIENT_SECRET;
-Cashfree.XEnvironment = Cashfree.Environment.PRODUCTION;
+Cashfree.XEnvironment = Cashfree.Environment.SANDBOX;
+
+
+const baseUrl = "https://sandbox.cashfree.com/pg"; // Use sandbox environment
+
+// Endpoint to create the order and initiate payment
+app.post("/create-order", async (req, res) => {
+    const { amount, orderId, customerId, customerPhone, customerEmail } = req.body;
+
+    const orderPayload = {
+        order_id: orderId,
+        order_amount: amount,
+        order_currency: "INR",
+        customer_details: {
+            customer_id: customerId,
+            customer_phone: customerPhone,
+            customer_email : customerEmail,
+        },
+        order_meta: {
+            return_url: "http://localhost:5173/"
+        }
+    };
+
+    try {
+        const response = await axios.post(`${baseUrl}/orders`, orderPayload, {
+            headers: {
+                "Content-Type": "application/json",
+                "x-client-id": process.env.CLIENT_ID,
+                "x-client-secret": process.env.CLIENT_SECRET,
+                'x-api-version': '2023-08-01'
+            }
+        });
+        res.json({ paymentSessionId: response.data.payment_session_id });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: "Failed to create order" });
+    }
+});
+
+app.get("/check-order-status", async (req, res) => {
+  const { orderId } = req.body;
+
+  try {
+      const response = await axios.get(`${baseUrl}/orders/${orderId}/payments`, {
+          headers: {
+              "Content-Type": "application/json",
+              "x-client-id": process.env.CLIENT_ID,
+                "x-client-secret": process.env.CLIENT_SECRET,
+              'x-api-version': '2023-08-01'
+          }
+      });
+
+      const paymentStatus = response.payment_status;
+      res.json({ paymentStatus });
+      console.log(response)
+  } catch (error) {
+      console.error("Error fetching payment status", error);
+      res.status(500).json({ error: "Failed to fetch payment status" });
+  }
+});
 
 // Generate a unique order ID
 function generateOrderId() {
@@ -45,70 +104,10 @@ app.get('/', (req, res) => {
 });
 
 // Payment initiation route
-app.post('/payment', async (req, res) => {
-  const { totalContribution, name, phone, address, email, donorTitle } = req.body; // Accept form data
-
-  try {
-    const request = {
-      order_amount: parseFloat(totalContribution), // Use the provided amount
-      order_currency: "INR",
-      order_id: await generateOrderId(),
-      customer_details: {
-        customer_id: `donor_${Date.now()}`, // Generate a unique ID
-        customer_name: name,
-        customer_phone: phone,
-        customer_email: email,
-        
-      },
-    };
-
-    Cashfree.PGCreateOrder("2023-08-01", request)
-      .then((response) => {
-        console.log(response.data);
-        const { payment_session_id, order_id } = response.data;
-
-        if (payment_session_id && order_id) {
-          res.json({ payment_session_id, order_id });
-        } else {
-          res.status(500).json({ message: "Failed to create payment session." });
-        }
-      })
-      .catch((error) => {
-        console.error(error.response?.data?.message || "Unknown error");
-        res.status(500).json({ message: error.response?.data?.message || "Failed to initiate payment" });
-      });
-
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Server error occurred while initiating payment" });
-  }
-});
 
 
 
-app.post("/api/verify", async (req, res) => {
-  const { orderId } = req.body;
 
-  try {
-    Cashfree.PGOrderFetchPayments("2023-08-01", orderId)
-      .then((response) => {
-        const paymentDetails = response.data;
-
-        if (paymentDetails && paymentDetails.payment_status === "SUCCESS") {
-          res.json({ payment_status: "SUCCESS" });
-        } else {
-          res.json({ payment_status: "FAILED" });
-        }
-      })
-      .catch((error) => {
-        console.error(error.response?.data?.message || "Unknown error");
-        res.status(500).json({ message: error.response?.data?.message || "Failed to fetch payment details." });
-      });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Error occurred during payment verification." });
-  }
-});
 
 
 const generateRandomId = async () => {

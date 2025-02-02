@@ -12,196 +12,19 @@ const Rewards = () => {
   const [currentAmount, setCurrentAmount] = useState(0);
   const [totalContribution, setTotalContribution] = useState(0);
   const [originalAmount, setOriginalAmount] = useState(0); // Store original amount for increment/decrement logic
-  const [cashfree, setCashfree] = useState(null);
+  // const [showVerificationPopup, setShowVerificationPopup] = useState(false);
+ 
   const [orderId, setOrderId] = useState("");
-  const [isProcessing, setIsProcessing] = useState(false);
 //   const [amount, setAmount] = useState(1.0);
 
-  // Initialize Cashfree SDK
-  useEffect(() => {
-    const initializeSDK = async () => {
-      try {
-        const cf = await load({ mode: "production" }); // Ensure Cashfree SDK is loaded
-        setCashfree(cf);
-      } catch (error) {
-        console.error("Failed to initialize Cashfree SDK:", error);
-      }
-    };
-    initializeSDK();
-  }, []);
-
-  // Fetch payment session ID
-  const getSessionId = async () => {
-    try {
-      const formData = {
-        name: document.getElementById('name').value,
-        phone: document.getElementById('phone').value,
-        email: document.getElementById('email').value,
-        donorTitle: donorTitle,
-        totalContribution: totalContribution,
-      };
   
-      const res = await axios.post(`${import.meta.env.VITE_BACKEND}/payment`, formData);
   
-      if (res.data && res.data.payment_session_id) {
-        setOrderId(res.data.order_id);
-        return res.data.payment_session_id;
-      } else {
-        alert("Failed to retrieve payment session ID.");
-        return null;
-      }
-    } catch (error) {
-      console.error("Error fetching session ID:", error);
-      alert("Unable to start payment process. Please try again later.");
-      return null;
-    }
-  };
-
-  // Verify payment status
-  const verifyPayment = async () => {
-    try {
-      console.log("Verifying payment...");
-      const res = await axios.post(`${import.meta.env.VITE_BACKEND}/verify`, { orderId });
-
-      if (res.data && res.data.payment_status === "SUCCESS") {
-        alert("Payment verified successfully!");
-      } else {
-        alert("Payment verification failed or payment not completed.");
-      }
-    } catch (error) {
-      console.error("Error verifying payment:", error);
-      alert("Error occurred during payment verification. Please try again.");
-    }
-  };
 
 
-  const validateReward = async () => {
-    try {
-      const res = await axios.post(`${import.meta.env.VITE_BACKEND}/validate-reward`, {
-        title: donorTitle,
-        amount: totalContribution,
-      });
-
-      if (res.data && res.data.valid) {
-        return true;
-      } else {
-        alert(res.data.message || "Invalid reward or amount.");
-        return false;
-      }
-    } catch (error) {
-      console.error("Reward validation failed:", error);
-      alert("Error validating reward. Please try again.");
-      return false;
-    }
-  };
 
 
-  const validateForm = () => {
-    const formFields = document.querySelectorAll('#userForm input, #userForm textarea');
-    let allFieldsFilled = true;
-
-    formFields.forEach(field => {
-      if (!field.value) {
-        allFieldsFilled = false;
-        field.style.border = '2px solid red';
-      } else {
-        field.style.border = '';
-      }
-    });
-
-    const phoneNumber = document.getElementById('phone').value;
-    const phonePattern = /^[0-9]{10}$/;
-
-    if (!phonePattern.test(phoneNumber)) {
-      allFieldsFilled = false;
-      alert("Phone number must be exactly 10 digits and contain only numbers.");
-      document.getElementById('phone').style.border = '2px solid red';
-    }
-
-    return allFieldsFilled;
-  };
-
-
-  // Handle payment initiation
-  const handleClick = async (e) => {
-    e.preventDefault();
-
-    if (isProcessing) {
-      alert("Payment is already in progress.");
-      return;
-    }
-
-    if (!validateForm()) {
-      alert("Please fill in all the details correctly.");
-      return;
-    }
-
-    setIsProcessing(true);
-
-    try {
-      const isValidReward = await validateReward();
-      if (!isValidReward) {
-        setIsProcessing(false);
-        return;
-      }
-
-      const sessionId = await getSessionId();
-      if (!sessionId) {
-        setIsProcessing(false);
-        return;
-      }
-
-      const checkoutOptions = {
-        paymentSessionId: sessionId,
-        redirectTarget: "_modal",
-      };
-
-
-      const formData = {
-        name: document.getElementById("name").value,
-        phone: document.getElementById("phone").value,
-        address: {
-          street: document.getElementById("street").value,
-          city: document.getElementById("city").value,
-          state: document.getElementById("state").value,
-          country: document.getElementById("country").value,
-          zip: document.getElementById("zip").value,
-        },
-        email: document.getElementById("email").value,
-        donorTitle: donorTitle,
-        totalContribution: currentAmount,
-        
-      };
+ 
   
-      // Send form data to the backend to store in Firebase
-      await axios.post(`${import.meta.env.VITE_BACKEND}/store-contribution1`, formData);
-
-      if (cashfree) {
-        cashfree
-            .checkout(checkoutOptions)
-            .then(async (response) => {
-                if (response.status === 200) {
-                    console.log("Payment successful");
-                    await verifyPayment();
-
-                } else if (response.status === "canceled") {
-                    alert("Payment canceled by user.");
-                } else if (response.status === "FAILED") {
-                    alert("Payment failed. Please try again.");
-                }
-            })
-            .catch((error) => {
-                console.error("Error during payment:", error);
-                alert("An error occurred during the payment process.");
-            });
-    }
-    } catch (error) {
-      console.error("Error initiating payment:", error);
-      alert("An unexpected error occurred. Please try again later.");
-    } finally {
-      setIsProcessing(false);
-    }
-  };
 
   // Fetch reward data from the backend
   useEffect(() => {
@@ -287,6 +110,122 @@ const Rewards = () => {
       setFormVisible(false);
     }
   };
+
+
+  
+
+    const handleClick = async (event) => {
+
+      event.preventDefault(); // Prevent form submission to allow for validation
+
+      const name = document.getElementById("name").value.trim();
+      const phone = document.getElementById("phone").value.trim();
+      const address = document.getElementById("address").value.trim();
+      const email = document.getElementById("email").value.trim();
+  
+      // Validate if all required fields are filled
+      if (!name || !phone || !address || !email) {
+          alert("All form details needs to be filled");
+          return; // Stop execution if validation fails
+      }
+
+        const UorderId = `order_${Date.now()}`; // Unique order ID
+        setOrderId[UorderId];
+        const customerId = "customer123";
+        const customerPhone = phone; // Replace with real data
+        const customerEmail = email;
+
+        
+        try {
+            // Create the order on the backend
+            const response = await axios.post(`${import.meta.env.VITE_BACKEND}/create-order`, {
+                amount:totalContribution,
+                orderId: UorderId,
+                customerId,
+                customerPhone,
+                customerEmail
+                
+            });
+
+            // Initialize the Cashfree payment gateway
+            const cashfree = await load({ mode: "sandbox" });
+
+            const checkoutOptions = {
+                paymentSessionId: response.data.paymentSessionId,
+                redirectTarget: "_modal",
+            };
+
+            // Proceed to payment
+            cashfree.checkout(checkoutOptions)
+
+            // setShowVerificationPopup(true);
+
+            // await verifyPayment();
+            
+            verifyPayment();
+           
+            handleCloseForm();
+          
+            
+            
+        } catch (error) {
+            console.error("Payment initialization failed", error);
+           
+        }
+    };
+
+
+ 
+    const verifyPayment = async () => {
+      try {
+          // Call API to verify payment using Cashfree PGOrderFetchPayments
+          const response = await axios.get(`${import.meta.env.VITE_BACKEND}/check-order-status`,{orderId : orderId});
+
+          const paymentStatus = response.data.paymentStatus;
+          if (paymentStatus === "SUCCESS") {
+              
+              alert("Payment Successful")
+
+              const name = document.getElementById("name").value;
+              const phone = document.getElementById("phone").value;
+              const address = document.getElementById("address").value;
+              const email = document.getElementById("email").value;
+              const donorTitle = document.getElementById("title").textContent;
+              const totalContribution = document.getElementById("totalAmount").textContent;
+
+            // Validate form data
+            if (!name || !phone || !address || !email || !donorTitle || !totalContribution) {
+                alert("All fields are required!");
+                return;
+            }
+
+            // Send data to backend
+            const storeResponse = await axios.post(`${import.meta.env.VITE_BACKEND}/store-contribution`, {
+                name,
+                phone,
+                address,
+                email,
+                donorTitle,
+                totalContribution
+            });
+
+            if (storeResponse.status === 200) {
+                alert("Donation successfully recorded!");
+            } else {
+                alert("Failed to store donation data.");
+            }
+          } else {
+              
+              alert("Payment failed");
+          }
+      } catch (error) {
+          console.error("Error verifying payment", error);
+          
+      }
+  };
+  
+
+    
   
 
   useEffect(() => {
@@ -425,50 +364,16 @@ const Rewards = () => {
               placeholder="Enter your phone number"
               required
             />
-            <label htmlFor="street">Street:</label>
+            <label htmlFor="address">Address:</label>
         <input
           type="text"
-          id="street"
-          name="street"
-          placeholder="Enter street address"
+          id="address"
+          name="address"
+          placeholder="Enter Address"
           required
         />
 
-        <label htmlFor="city">City:</label>
-        <input
-          type="text"
-          id="city"
-          name="city"
-          placeholder="Enter your city"
-          required
-        />
-
-        <label htmlFor="state">State:</label>
-        <input
-          type="text"
-          id="state"
-          name="state"
-          placeholder="Enter your state"
-          required
-        />
-
-        <label htmlFor="country">Country:</label>
-        <input
-          type="text"
-          id="country"
-          name="country"
-          placeholder="Enter your country"
-          required
-        />
-
-        <label htmlFor="zip">ZIP Code:</label>
-        <input
-          type="text"
-          id="zip"
-          name="zip"
-          placeholder="Enter your ZIP code"
-          required
-        />
+        
             <label htmlFor="email">Email:</label>
             <input
               type="email"
@@ -515,6 +420,15 @@ const Rewards = () => {
           </form>
         </div>
       )}
+
+      {/* {showVerificationPopup && (
+        <div className="verification-popup">
+          <div className="popup-content">
+            <h3>Verifying Payment...</h3>
+            <p>Please wait while we verify your transaction.</p>
+          </div>
+        </div>
+      )} */}
     </section>
   );
 };
